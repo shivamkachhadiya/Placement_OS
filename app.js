@@ -1242,8 +1242,24 @@ function escapeQuotes(str) {
 
 function formatTimestamp(isoString) {
     if (!isoString) return "Recently";
-    const date = new Date(isoString);
-    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // ISO string string normalization (Ensure UTC offset 'Z' exists if missing)
+    let formattedString = isoString;
+    if (typeof isoString === 'string' && !isoString.endsWith('Z') && !isoString.includes('+')) {
+        formattedString = isoString + 'Z';
+    }
+
+    const date = new Date(formattedString);
+
+    // Format explicitly in Indian Standard Time (IST)
+    return date.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
 }
 
 function openEditModal(id, company, title, content) {
