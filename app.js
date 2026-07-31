@@ -31,10 +31,23 @@ function closeSuccessModal() {
     document.getElementById("successModal").classList.add("hidden");
 }
 
-function showCustomAlert(message) {
+function showCustomAlert(message, title = "Authentication Alert", isPostError = false) {
     const msgElement = document.getElementById("customAlertMessage");
+    const titleElement = document.getElementById("customAlertTitle");
+    const tipElement = document.getElementById("customAlertTip");
     const modal = document.getElementById("customAlertModal");
+
     if (msgElement) msgElement.innerText = message;
+    if (titleElement) titleElement.innerText = title;
+
+    if (tipElement) {
+        if (isPostError) {
+            tipElement.classList.remove("hidden");
+        } else {
+            tipElement.classList.add("hidden");
+        }
+    }
+
     if (modal) modal.classList.remove("hidden");
 }
 
@@ -639,7 +652,9 @@ async function handleAuthSubmit(e) {
             name: document.getElementById("authName").value,
             branch: document.getElementById("authBranch").value,
             batch: document.getElementById("authBatch").value,
-            email, password, role: "STUDENT"
+            email: email,
+            password: password,
+            role: "STUDENT"
         };
 
         try {
@@ -648,16 +663,21 @@ async function handleAuthSubmit(e) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-            const regData = await regRes.json();
 
-            if (!regData.success) {
-                showCustomAlert(regData.message || "Registration failed!");
+            let regData = {};
+            try { regData = await regRes.json(); } catch(err) {}
+
+            if (!regRes.ok || regData.success === false) {
+                closeAuthModal();
+                showCustomAlert(regData.message || "Registration failed! Account might already exist.", "Registration Failed");
                 return;
             }
 
+            // Auto Login after successful registration
             await performLogin(email, password);
         } catch (err) {
-            showCustomAlert("Error connecting to server!");
+            closeAuthModal();
+            showCustomAlert("Connection error! Server might be starting up.", "Network Error");
         }
     } else {
         await performLogin(email, password);
@@ -668,7 +688,6 @@ async function performLogin(email, password) {
     const submitBtn = document.getElementById("authSubmitBtn");
     const originalText = submitBtn ? submitBtn.innerText : "Login";
 
-    // 1. Loading state set karein aur button disable karein (Taki stuck lagne ki jagah processing dikhe)
     if (submitBtn) {
         submitBtn.innerText = "Authenticating...";
         submitBtn.disabled = true;
@@ -681,38 +700,46 @@ async function performLogin(email, password) {
             body: JSON.stringify({ email, password })
         });
 
-        const data = await res.json();
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
 
-        if (data.success) {
-            const responseData = data.data;
-            token = typeof responseData === 'string' ? responseData : (responseData.token || responseData.jwt);
+        if (!res.ok || data.success === false) {
+            const errorMsg = data.message || (res.status === 401 || res.status === 403
+                ? "Invalid Email or Password! If you don't have an account, please Register."
+                : "User does not exist or login failed!");
 
-            currentUser = responseData.user || {
-                email: email,
-                name: email.split("@")[0]
-            };
-
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(currentUser));
-
+            //  CRITICAL STEP: Close login form FIRST, then show alert!
             closeAuthModal();
-            updateAuthUI();
-            reloadCurrentFeed();
-        } else {
-            // User missing ya wrong password par alert show karein
-            showCustomAlert(data.message || "User does not exist or invalid credentials!");
+            showCustomAlert(errorMsg, "Login Failed");
+            return;
         }
+
+        // Success Flow
+        const responseData = data.data || data;
+        token = typeof responseData === 'string' ? responseData : (responseData.token || responseData.jwt);
+
+        currentUser = responseData.user || {
+            email: email,
+            name: email.split("@")[0]
+        };
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(currentUser));
+
+        closeAuthModal();
+        updateAuthUI();
+        reloadCurrentFeed();
+
     } catch (err) {
-        showCustomAlert("Connection error! Server might be starting or user not found.");
+        closeAuthModal();
+        showCustomAlert("Unable to connect to server. Please try again later!", "Server Error");
     } finally {
-        // 2. CRITICAL FIX: Error aane par button ko dubara normal state mein laayein (Stuck state repair)
         if (submitBtn) {
             submitBtn.innerText = originalText;
             submitBtn.disabled = false;
         }
     }
 }
-
 function handleLogout() {
     localStorage.clear();
     token = null;

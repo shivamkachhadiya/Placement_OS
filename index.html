@@ -242,24 +242,31 @@
 </div>
 
 <!-- Custom Rejection Alert Modal -->
+<!-- Custom Alert Modal (Generic Dynamic) -->
 <div id="customAlertModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="glass-card max-w-md w-full p-6 rounded-2xl relative border border-red-500/40 shadow-2xl text-center space-y-4">
         <div class="w-16 h-16 mx-auto rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-2xl">
             <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
-        <h3 class="text-xl font-bold text-red-400">Post Auto-Rejected</h3>
+
+        <!-- Dynamic Title -->
+        <h3 id="customAlertTitle" class="text-xl font-bold text-red-400">Authentication Alert</h3>
+
+        <!-- Dynamic Message -->
         <p id="customAlertMessage" class="text-sm text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-            Content must be placement or career related!
+            User does not exist or invalid credentials!
         </p>
-        <p class="text-xs text-slate-400">
+
+        <!-- Sub-tip / Extra info (Hidden by default, shown for posts) -->
+        <p id="customAlertTip" class="hidden text-xs text-slate-400">
             Tip: Include keywords like <span class="text-cyan-400 font-medium">interview, round, coding, DSA, offer, salary</span>.
         </p>
+
         <button onclick="closeCustomAlert()" class="w-full bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 font-semibold py-2.5 rounded-xl transition-all cursor-pointer">
-            Got it, I'll update
+            Okay, Got it
         </button>
     </div>
 </div>
-
 <!-- Auth Modal -->
 <div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-2xl relative border border-cyber-border shadow-2xl">
