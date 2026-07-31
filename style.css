@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Base Styles */
 body {
     font-family: 'Inter', sans-serif;
     margin: 0;
@@ -13,7 +14,7 @@ body {
     -webkit-backdrop-filter: blur(16px);
 }
 
-/* Input Fields */
+/* Cyber Input Fields */
 .cyber-input {
     background: rgba(30, 41, 59, 0.5);
     border: 1px solid rgba(51, 65, 85, 0.8);
@@ -54,69 +55,29 @@ body {
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
 }
 
+/* Hide Horizontal Scrollbars for Clean Touch Scrolling */
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
 /* =========================================================
-   MOBILE RESPONSIVENESS FIXES (Screens <= 768px)
+   CLEAN MOBILE OVERFLOW FIXES (Screens <= 768px)
    ========================================================= */
 
 @media screen and (max-width: 768px) {
-    /* 1. Prevent Horizontal Screen Overflow */
+    /* Prevent Screen Horizontal Overflow */
     html, body {
         overflow-x: hidden;
         width: 100%;
     }
 
-    /* 2. Top Header & Navbar Fix */
-    header, nav, .navbar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-        padding: 1rem !important;
-    }
-
-    /* Header Nav Buttons (Global Feed, My Posts, User Profile) */
-    .nav-buttons, nav > div, header > div {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 8px !important;
-        width: 100% !important;
-    }
-
-    /* 3. Grid / Flex Container Stack (Share Experience + Feed) */
-    main, .main-container, .container, .dashboard-layout {
-        display: flex !important;
-        flex-direction: column !important;
-        padding: 0.75rem !important;
-        gap: 1.25rem !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 4. Full Width Cards for Mobile */
-    .glass-card, .card, .share-experience-card, .feed-container {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 5. Horizontal Scroll for Filter Chips */
-    .company-filters, .filter-container {
-        display: flex !important;
-        overflow-x: auto !important;
-        white-space: nowrap !important;
-        padding-bottom: 8px !important;
-        width: 100% !important;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    /* Hide scrollbar for clean UI */
-    .company-filters::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* 6. Form Elements Fitting */
+    /* Form Elements BoxFit on Mobile */
     .cyber-input, textarea, input, select {
-        width: 100% !important;
-        box-sizing: border-box !important;
+        width: 100%;
+        box-sizing: border-box;
     }
 }
