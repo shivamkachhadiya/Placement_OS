@@ -5,7 +5,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "posts")
+@Table(
+        name = "posts",
+        indexes = {
+                @Index(name = "idx_company_name", columnList = "company_name"),
+                @Index(name = "idx_created_at", columnList = "created_at")
+        }
+)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Post {
 
@@ -37,7 +43,7 @@ public class Post {
         this.createdAt = LocalDateTime.now();
     }
 
-    // --- GETTERS AND SETTERS (Yahan miss ho rahe the) ---
+    // --- GETTERS AND SETTERS ---
 
     public Long getId() {
         return id;
