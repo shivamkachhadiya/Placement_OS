@@ -665,12 +665,22 @@ async function handleAuthSubmit(e) {
 }
 
 async function performLogin(email, password) {
+    const submitBtn = document.getElementById("authSubmitBtn");
+    const originalText = submitBtn ? submitBtn.innerText : "Login";
+
+    // 1. Loading state set karein aur button disable karein (Taki stuck lagne ki jagah processing dikhe)
+    if (submitBtn) {
+        submitBtn.innerText = "Authenticating...";
+        submitBtn.disabled = true;
+    }
+
     try {
         const res = await fetch(`${API_BASE}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
         });
+
         const data = await res.json();
 
         if (data.success) {
@@ -689,10 +699,17 @@ async function performLogin(email, password) {
             updateAuthUI();
             reloadCurrentFeed();
         } else {
-            showCustomAlert(data.message || "Login failed!");
+            // User missing ya wrong password par alert show karein
+            showCustomAlert(data.message || "User does not exist or invalid credentials!");
         }
     } catch (err) {
-        showCustomAlert("Error connecting to server!");
+        showCustomAlert("Connection error! Server might be starting or user not found.");
+    } finally {
+        // 2. CRITICAL FIX: Error aane par button ko dubara normal state mein laayein (Stuck state repair)
+        if (submitBtn) {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+        }
     }
 }
 
