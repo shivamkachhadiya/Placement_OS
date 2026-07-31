@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlacementOS | Student Feed</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            dark: '#080c14',
+                            card: '#0f172a80',
+                            border: '#1e293b',
+                            accent: '#38bdf8',
+                            green: '#10b981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-cyber-dark text-slate-100 min-h-screen font-sans antialiased flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+<!-- Ambient Glow Background -->
+<div class="fixed top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="fixed bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+<!-- Navigation Bar -->
+<nav class="sticky top-0 z-40 backdrop-blur-md bg-cyber-dark/80 border-b border-cyber-border/80 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3 cursor-pointer" onclick="filterFeed('ALL')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/20">
+            P
+        </div>
+        <span class="text-xl font-bold tracking-wider bg-gradient-to-r from-cyan-400 via-sky-200 to-indigo-400 bg-clip-text text-transparent">
+                Placement<span class="text-cyan-400">OS</span>
+            </span>
+    </div>
+
+    <div class="flex items-center gap-4">
+        <div id="feedTabs" class="hidden md:flex items-center gap-2 bg-slate-900/80 p-1 rounded-xl border border-cyber-border">
+            <button id="tabAll" onclick="filterFeed('ALL')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                <i class="fa-solid fa-globe mr-1"></i> Global Feed
+            </button>
+            <button id="tabMy" onclick="filterFeed('MY')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+                <i class="fa-solid fa-user-pen mr-1"></i> My Posts
+            </button>
+        </div>
+
+        <div id="authActions" class="flex items-center gap-4"></div>
+    </div>
+</nav>
+
+<!-- Main Container: Split Dashboard -->
+<main class="max-w-7xl w-full mx-auto px-4 py-6 flex-1">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- LEFT SIDE: Sticky Content Writer -->
+        <div id="writingPadColumn" class="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
+            <div id="writingPadCard" class="glass-card p-6 rounded-2xl border border-cyber-border hover:border-cyan-500/40 transition-all duration-300 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib"></i> Share Experience
+                    </h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> AI Filter
+                        </span>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Company Name</label>
+                        <input type="text" id="postCompany" placeholder="e.g. Microsoft, Honeywell, Amazon..." class="cyber-input w-full">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Topic / Round Title</label>
+                        <input type="text" id="postTitle" placeholder="e.g. System Design / Coding Round 1" class="cyber-input w-full">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Detailed Experience</label>
+                        <textarea id="postContent" rows="5" placeholder="Mention specific questions, DSA topics, salary/CTC, HR round details..." class="cyber-input w-full resize-none"></textarea>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-cyan-400"></i>
+                        Keywords (e.g. <span class="text-cyan-300">interview, DSA, round, offer</span>) avoid rejection.
+                    </p>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <span id="charCounter" class="text-xs text-slate-400">0 / 5000 chars</span>
+                        <button onclick="handleCreatePost()" class="btn-primary text-xs px-4 py-2.5">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Post Experience
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: Feed + Company Filter Bar -->
+        <div id="feedColumn" class="lg:col-span-7 space-y-4">
+            <!-- Feed Section Header -->
+            <div class="flex justify-between items-center bg-slate-900/40 p-4 rounded-xl border border-cyber-border">
+                <h3 id="feedTitle" class="text-lg font-bold tracking-wide text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-amber-400"></i> Global Experience Feed
+                </h3>
+                <button onclick="reloadCurrentFeed()" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh
+                </button>
+            </div>
+
+            <!-- DYNAMIC COMPANY FILTER BAR -->
+            <div id="companyFilterSection" class="space-y-1">
+                    <span class="text-[11px] text-slate-400 font-medium flex items-center gap-1 pl-1">
+                        <i class="fa-solid fa-filter text-cyan-400"></i> Filter by Company:
+                    </span>
+                <div id="companyFilterBar" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    <!-- Company Filter Buttons generated dynamically in JS -->
+                </div>
+            </div>
+
+            <!-- Posts Feed Container -->
+            <div id="postsFeed" class="space-y-6 pt-2"></div>
+        </div>
+
+    </div>
+</main>
+
+<!-- FOOTER: Owner Details Tag -->
+<footer class="mt-12 py-4 border-t border-cyber-border/80 bg-cyber-dark/90 backdrop-blur-md text-center text-xs text-slate-400">
+    <p>
+        Made by <button onclick="openOwnerModal()" class="text-cyan-400 hover:text-cyan-300 font-bold underline transition-all">intelligent person (Owner Details)</button>
+    </p>
+</footer>
+
+<!-- SUCCESS CHECKMARK POPUP MODAL -->
+<div id="successModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full p-6 rounded-2xl relative border border-emerald-500/40 shadow-2xl shadow-emerald-500/10 text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-3xl animate-bounce">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold text-emerald-400">Post Successful!</h3>
+            <p id="successModalMessage" class="text-xs text-slate-300 mt-1">Your interview experience has been published live to the feed.</p>
+        </div>
+
+        <button onclick="closeSuccessModal()" class="w-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs transition-all">
+            Awesome!
+        </button>
+    </div>
+</div>
+
+<!-- OWNER DETAILS POPUP MODAL -->
+<div id="ownerModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full p-6 rounded-2xl relative border border-cyan-500/40 shadow-2xl shadow-cyan-500/10 text-center space-y-4">
+        <button onclick="closeOwnerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-cyan-500 via-sky-400 to-indigo-500 flex items-center justify-center text-3xl font-black text-white shadow-lg shadow-cyan-500/30">SK</div>
+        <div>
+            <h3 class="text-xl font-bold text-slate-100">Shivam Kachhadiya</h3>
+            <p class="text-xs text-cyan-400 font-semibold tracking-wide mt-0.5">25MCS0031</p>
+        </div>
+        <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+            <p class="text-slate-300 font-medium"><i class="fa-solid fa-graduation-cap text-cyan-400 mr-1.5"></i> M.Tech CSE</p>
+            <p class="text-slate-400"><i class="fa-solid fa-code text-indigo-400 mr-1.5"></i> Systems & Backend Developer</p>
+        </div>
+        <button onclick="closeOwnerModal()" class="btn-primary w-full py-2 text-xs font-semibold">Close Details</button>
+    </div>
+</div>
+
+<!-- Edit Post Modal -->
+<div id="editPostModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full p-6 rounded-2xl relative border border-cyber-border shadow-2xl">
+        <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h3 class="text-lg font-bold text-cyan-400 mb-4"><i class="fa-solid fa-pen-to-square mr-2"></i>Edit Experience Post</h3>
+        <input type="hidden" id="editPostId">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Company</label>
+                <input type="text" id="editCompany" class="cyber-input w-full">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Title</label>
+                <input type="text" id="editTitle" class="cyber-input w-full">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Content</label>
+                <textarea id="editContent" rows="4" class="cyber-input w-full resize-none"></textarea>
+            </div>
+            <button onclick="handleUpdatePost()" class="btn-primary w-full py-2.5 text-sm">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Rejection Alert Modal -->
+<div id="customAlertModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl relative border border-red-500/40 shadow-2xl text-center space-y-4">
+        <div class="w-16 h-16 mx-auto rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-2xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="text-xl font-bold text-red-400">Post Auto-Rejected</h3>
+        <p id="customAlertMessage" class="text-sm text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            Content must be placement or career related!
+        </p>
+        <p class="text-xs text-slate-400">
+            Tip: Include keywords like <span class="text-cyan-400 font-medium">interview, round, coding, DSA, offer, salary</span>.
+        </p>
+        <button onclick="closeCustomAlert()" class="w-full bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 font-semibold py-2.5 rounded-xl transition-all">
+            Got it, I'll update
+        </button>
+    </div>
+</div>
+
+<!-- Auth Modal -->
+<div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-8 rounded-2xl relative border border-cyber-border shadow-2xl">
+        <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <h2 id="modalTitle" class="text-2xl font-bold text-center text-cyan-400 mb-6">Login to PlacementOS</h2>
+        <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+            <div id="registerFields" class="hidden space-y-4">
+                <input type="text" id="authName" placeholder="Full Name" class="cyber-input w-full">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="authBranch" placeholder="Branch (e.g. CSE)" class="cyber-input">
+                    <input type="text" id="authBatch" placeholder="Batch (e.g. 2027)" class="cyber-input">
+                </div>
+            </div>
+            <input type="email" id="authEmail" placeholder="Email Address" required class="cyber-input w-full">
+            <input type="password" id="authPassword" placeholder="Password" required class="cyber-input w-full">
+            <button type="submit" id="authSubmitBtn" class="btn-primary w-full py-3 mt-2">Login</button>
+        </form>
+        <div class="text-center mt-6 text-sm text-slate-400">
+            <span id="modalToggleText">Don't have an account?</span>
+            <button onclick="toggleAuthMode()" id="modalToggleBtn" class="text-cyan-400 font-semibold underline ml-1">Register</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -24,6 +24,8 @@ public class UserRequestDTO {
     @NotBlank(message = "Batch is required")
     private String batch;
 
+    private String role; // e.g. "STUDENT" or "ADMIN" (Default logic service/controller handle karega)
+
     public UserRequestDTO() {
     }
 
@@ -65,5 +67,13 @@ public class UserRequestDTO {
 
     public void setBatch(String batch) {
         this.batch = batch;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

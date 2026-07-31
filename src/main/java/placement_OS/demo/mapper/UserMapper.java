@@ -16,8 +16,15 @@ public class UserMapper {
         user.setBranch(request.getBranch());
         user.setBatch(request.getBatch());
 
-        // Default role
-        user.setRole("STUDENT");
+        // Dynamic role checking: Request mein role diya hai toh wo use karo, varna default STUDENT
+        if (request.getRole() != null && !request.getRole().trim().isEmpty()) {
+            user.setRole(request.getRole().toUpperCase());
+        } else {
+            user.setRole("STUDENT");
+        }
+
+        // Default placement status will be false via entity standard initialization
+        user.setPlaced(false);
 
         return user;
     }
@@ -32,6 +39,9 @@ public class UserMapper {
         response.setBranch(user.getBranch());
         response.setBatch(user.getBatch());
         response.setRole(user.getRole());
+
+        // Placement status map ho gaya yahan
+        response.setPlaced(user.isPlaced());
 
         return response;
     }

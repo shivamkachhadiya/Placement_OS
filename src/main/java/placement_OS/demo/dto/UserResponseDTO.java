@@ -8,6 +8,7 @@ public class UserResponseDTO {
     private String branch;
     private String batch;
     private String role;
+    private boolean isPlaced; // Frontend ke liye placement status
 
     public UserResponseDTO() {
     }
@@ -58,5 +59,13 @@ public class UserResponseDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isPlaced() {
+        return isPlaced;
+    }
+
+    public void setPlaced(boolean placed) {
+        isPlaced = placed;
     }
 }

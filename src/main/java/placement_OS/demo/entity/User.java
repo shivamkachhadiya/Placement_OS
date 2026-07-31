@@ -1,9 +1,12 @@
 package placement_OS.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
@@ -13,9 +16,10 @@ public class User {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -26,7 +30,11 @@ public class User {
     private String batch;
 
     @Column(nullable = false)
-    private String role;
+    private String role; // STUDENT or ADMIN
+
+    // Naya field placement status track karne ke liye
+    @Column(name = "is_placed", nullable = false, columnDefinition = "boolean default false")
+    private boolean isPlaced = false;
 
     public User() {
     }
@@ -83,4 +91,12 @@ public class User {
         this.role = role;
     }
 
+    // Naye Getters aur Setters
+    public boolean isPlaced() {
+        return isPlaced;
+    }
+
+    public void setPlaced(boolean placed) {
+        isPlaced = placed;
+    }
 }
