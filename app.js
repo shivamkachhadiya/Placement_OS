@@ -806,8 +806,6 @@ let isRegisterMode = false;
 let currentFeedMode = 'ALL';
 let activeCompanyFilter = 'ALL';
 let rawPostsData = [];
-let coldStartTimerInterval = null;
-let coldSeconds = 0;
 // Local state store for posts
 const postInteractions = {};
 let coldStartTimerInterval = null;
