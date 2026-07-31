@@ -1,5 +1,6 @@
 package placement_OS.demo.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import placement_OS.demo.entity.Comment;
@@ -17,7 +18,8 @@ import java.util.Optional;
 
 @Service
 public class InteractionService {
-
+    @Autowired
+    private ProfanityFilterService profanityFilterService;
     private final PostLikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
@@ -64,6 +66,9 @@ public class InteractionService {
 
     // Add Comment
     public Comment addComment(Long postId, String content, String userEmail) {
+        if (profanityFilterService.containsProfanity(content)) {
+            throw new IllegalArgumentException("Comment contains offensive or abusive language!");
+        }
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Post post = postRepository.findById(postId)

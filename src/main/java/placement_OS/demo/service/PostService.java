@@ -1,5 +1,6 @@
 package placement_OS.demo.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import placement_OS.demo.entity.Post;
 import placement_OS.demo.entity.User;
@@ -12,7 +13,8 @@ import java.util.List;
 
 @Service
 public class PostService {
-
+    @Autowired
+    private ProfanityFilterService profanityFilterService;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -32,6 +34,12 @@ public class PostService {
 
     public Post createPost(Post post, String userEmail) {
         // Checking across Company Name + Title + Content (All 3 fields)
+        if (profanityFilterService.containsProfanity(post.getTitle()) ||
+                profanityFilterService.containsProfanity(post.getContent()) ||
+                profanityFilterService.containsProfanity(post.getCompanyName())) {
+
+            throw new IllegalArgumentException("DONT USE 'GAALI' Supreme court mei case kr dunga' Post contains inappropriate language or abuse. Please keep the platform professional!");
+        }
         String combinedText = (post.getCompanyName() + " " + post.getTitle() + " " + post.getContent()).toLowerCase();
 
         boolean isRelevant = ALLOWED_KEYWORDS.stream().anyMatch(combinedText::contains);
@@ -69,6 +77,12 @@ public class PostService {
     }
     // Post edit / update functionality (Author-only restriction)
     public Post updatePost(Long postId, String companyName, String title, String content, String userEmail) {
+        if (profanityFilterService.containsProfanity(title) ||
+                profanityFilterService.containsProfanity(content) ||
+                profanityFilterService.containsProfanity(companyName)) {
+
+            throw new IllegalArgumentException("Updated content contains inappropriate language!");
+        }
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
 

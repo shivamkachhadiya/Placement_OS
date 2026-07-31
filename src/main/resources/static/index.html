@@ -46,10 +46,10 @@
 
     <div class="flex items-center gap-4">
         <div id="feedTabs" class="hidden md:flex items-center gap-2 bg-slate-900/80 p-1 rounded-xl border border-cyber-border">
-            <button id="tabAll" onclick="filterFeed('ALL')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <button id="tabAll" onclick="filterFeed('ALL')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 cursor-pointer">
                 <i class="fa-solid fa-globe mr-1"></i> Global Feed
             </button>
-            <button id="tabMy" onclick="filterFeed('MY')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all">
+            <button id="tabMy" onclick="filterFeed('MY')" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all cursor-pointer">
                 <i class="fa-solid fa-user-pen mr-1"></i> My Posts
             </button>
         </div>
@@ -112,7 +112,7 @@
                 <h3 id="feedTitle" class="text-lg font-bold tracking-wide text-slate-200 flex items-center gap-2">
                     <i class="fa-solid fa-fire text-amber-400"></i> Global Experience Feed
                 </h3>
-                <button onclick="reloadCurrentFeed()" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1">
+                <button onclick="reloadCurrentFeed()" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer">
                     <i class="fa-solid fa-rotate-right"></i> Refresh
                 </button>
             </div>
@@ -122,9 +122,7 @@
                     <span class="text-[11px] text-slate-400 font-medium flex items-center gap-1 pl-1">
                         <i class="fa-solid fa-filter text-cyan-400"></i> Filter by Company:
                     </span>
-                <div id="companyFilterBar" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-                    <!-- Company Filter Buttons generated dynamically in JS -->
-                </div>
+                <div id="companyFilterBar" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none"></div>
             </div>
 
             <!-- Posts Feed Container -->
@@ -137,23 +135,55 @@
 <!-- FOOTER: Owner Details Tag -->
 <footer class="mt-12 py-4 border-t border-cyber-border/80 bg-cyber-dark/90 backdrop-blur-md text-center text-xs text-slate-400">
     <p>
-        Made by <button onclick="openOwnerModal()" class="text-cyan-400 hover:text-cyan-300 font-bold underline transition-all">intelligent person (Owner Details)</button>
+        Made by <button onclick="openOwnerModal()" class="text-cyan-400 hover:text-cyan-300 font-bold underline transition-all cursor-pointer">intelligent person (Owner Details)</button>
     </p>
 </footer>
 
+<!-- USER PROFILE MODAL (FIXED TARGET BINDING) -->
+<div id="profileModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl relative border border-cyber-border shadow-2xl">
+        <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
+            <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+        <div class="text-center mb-6">
+            <div id="profileAvatar" class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center text-3xl font-black text-white shadow-lg shadow-cyan-500/20 mb-3">
+                U
+            </div>
+            <h3 id="profileName" class="text-xl font-bold text-slate-100">User Name</h3>
+            <p id="profileEmail" class="text-xs text-slate-400">user@gmail.com</p>
+            <div id="profileBadge" class="mt-2"></div>
+        </div>
+        <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800 text-sm">
+            <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">Branch</span>
+                <span id="profileBranch" class="font-semibold text-slate-200">-</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-slate-800">
+                <span class="text-slate-400">Batch</span>
+                <span id="profileBatch" class="font-semibold text-slate-200">-</span>
+            </div>
+            <div class="flex justify-between py-1">
+                <span class="text-slate-400">Role</span>
+                <span id="profileRole" class="font-semibold text-cyan-400">STUDENT</span>
+            </div>
+        </div>
+        <button onclick="filterFeed('MY'); closeProfileModal();" class="btn-primary w-full py-2.5 mt-5 text-sm cursor-pointer">
+            <i class="fa-solid fa-folder-open mr-2"></i> View My Posts
+        </button>
+    </div>
+</div>
+
 <!-- SUCCESS CHECKMARK POPUP MODAL -->
 <div id="successModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-sm w-full p-6 rounded-2xl relative border border-emerald-500/40 shadow-2xl shadow-emerald-500/10 text-center space-y-4">
+    <div class="glass-card max-w-sm w-full p-6 rounded-2xl relative border border-emerald-500/40 shadow-2xl text-center space-y-4">
         <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-3xl animate-bounce">
             <i class="fa-solid fa-circle-check"></i>
         </div>
-
         <div>
             <h3 class="text-xl font-bold text-emerald-400">Post Successful!</h3>
             <p id="successModalMessage" class="text-xs text-slate-300 mt-1">Your interview experience has been published live to the feed.</p>
         </div>
-
-        <button onclick="closeSuccessModal()" class="w-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs transition-all">
+        <button onclick="closeSuccessModal()" class="w-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 font-semibold py-2.5 rounded-xl text-xs transition-all cursor-pointer">
             Awesome!
         </button>
     </div>
@@ -161,8 +191,8 @@
 
 <!-- OWNER DETAILS POPUP MODAL -->
 <div id="ownerModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-sm w-full p-6 rounded-2xl relative border border-cyan-500/40 shadow-2xl shadow-cyan-500/10 text-center space-y-4">
-        <button onclick="closeOwnerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+    <div class="glass-card max-w-sm w-full p-6 rounded-2xl relative border border-cyan-500/40 shadow-2xl text-center space-y-4">
+        <button onclick="closeOwnerModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
             <i class="fa-solid fa-xmark text-xl"></i>
         </button>
         <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-cyan-500 via-sky-400 to-indigo-500 flex items-center justify-center text-3xl font-black text-white shadow-lg shadow-cyan-500/30">SK</div>
@@ -174,14 +204,14 @@
             <p class="text-slate-300 font-medium"><i class="fa-solid fa-graduation-cap text-cyan-400 mr-1.5"></i> M.Tech CSE</p>
             <p class="text-slate-400"><i class="fa-solid fa-code text-indigo-400 mr-1.5"></i> Systems & Backend Developer</p>
         </div>
-        <button onclick="closeOwnerModal()" class="btn-primary w-full py-2 text-xs font-semibold">Close Details</button>
+        <button onclick="closeOwnerModal()" class="btn-primary w-full py-2 text-xs font-semibold cursor-pointer">Close Details</button>
     </div>
 </div>
 
 <!-- Edit Post Modal -->
 <div id="editPostModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="glass-card max-w-lg w-full p-6 rounded-2xl relative border border-cyber-border shadow-2xl">
-        <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
             <i class="fa-solid fa-xmark text-xl"></i>
         </button>
         <h3 class="text-lg font-bold text-cyan-400 mb-4"><i class="fa-solid fa-pen-to-square mr-2"></i>Edit Experience Post</h3>
@@ -199,7 +229,7 @@
                 <label class="block text-xs text-slate-400 mb-1">Content</label>
                 <textarea id="editContent" rows="4" class="cyber-input w-full resize-none"></textarea>
             </div>
-            <button onclick="handleUpdatePost()" class="btn-primary w-full py-2.5 text-sm">Save Changes</button>
+            <button onclick="handleUpdatePost()" class="btn-primary w-full py-2.5 text-sm cursor-pointer">Save Changes</button>
         </div>
     </div>
 </div>
@@ -217,7 +247,7 @@
         <p class="text-xs text-slate-400">
             Tip: Include keywords like <span class="text-cyan-400 font-medium">interview, round, coding, DSA, offer, salary</span>.
         </p>
-        <button onclick="closeCustomAlert()" class="w-full bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 font-semibold py-2.5 rounded-xl transition-all">
+        <button onclick="closeCustomAlert()" class="w-full bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 font-semibold py-2.5 rounded-xl transition-all cursor-pointer">
             Got it, I'll update
         </button>
     </div>
@@ -226,7 +256,7 @@
 <!-- Auth Modal -->
 <div id="authModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="glass-card max-w-md w-full p-8 rounded-2xl relative border border-cyber-border shadow-2xl">
-        <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
             <i class="fa-solid fa-xmark text-xl"></i>
         </button>
         <h2 id="modalTitle" class="text-2xl font-bold text-center text-cyan-400 mb-6">Login to PlacementOS</h2>
@@ -240,11 +270,11 @@
             </div>
             <input type="email" id="authEmail" placeholder="Email Address" required class="cyber-input w-full">
             <input type="password" id="authPassword" placeholder="Password" required class="cyber-input w-full">
-            <button type="submit" id="authSubmitBtn" class="btn-primary w-full py-3 mt-2">Login</button>
+            <button type="submit" id="authSubmitBtn" class="btn-primary w-full py-3 mt-2 cursor-pointer">Login</button>
         </form>
         <div class="text-center mt-6 text-sm text-slate-400">
             <span id="modalToggleText">Don't have an account?</span>
-            <button onclick="toggleAuthMode()" id="modalToggleBtn" class="text-cyan-400 font-semibold underline ml-1">Register</button>
+            <button onclick="toggleAuthMode()" id="modalToggleBtn" class="text-cyan-400 font-semibold underline ml-1 cursor-pointer">Register</button>
         </div>
     </div>
 </div>

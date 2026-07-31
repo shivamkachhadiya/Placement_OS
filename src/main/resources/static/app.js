@@ -6,6 +6,7 @@ let currentFeedMode = 'ALL';
 let activeCompanyFilter = 'ALL';
 let rawPostsData = [];
 
+// Local state store for posts
 const postInteractions = {};
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Success Modal Pop-up Handlers
+// Modals Handlers
 function showSuccessModal(msg) {
     if (msg) document.getElementById("successModalMessage").innerText = msg;
     document.getElementById("successModal").classList.remove("hidden");
@@ -42,8 +43,61 @@ function closeCustomAlert() {
     if (modal) modal.classList.add("hidden");
 }
 
-function openOwnerModal() { document.getElementById("ownerModal").classList.remove("hidden"); }
-function closeOwnerModal() { document.getElementById("ownerModal").classList.add("hidden"); }
+// User Profile Modal Handlers (BULLETPROOF FIX)
+function openProfileModal() {
+    const user = currentUser || JSON.parse(localStorage.getItem("user") || "{}");
+
+    const email = user.email || "user@placementos.com";
+    const displayName = user.name || (email.includes("@") ? email.split("@")[0] : "User");
+    const branch = user.branch || "CSE";
+    const batch = user.batch || "2026";
+    const role = user.role || "STUDENT";
+    const isPlaced = user.placed || false;
+
+    const nameEl = document.getElementById("profileName");
+    const emailEl = document.getElementById("profileEmail");
+    const branchEl = document.getElementById("profileBranch");
+    const batchEl = document.getElementById("profileBatch");
+    const roleEl = document.getElementById("profileRole");
+    const avatarEl = document.getElementById("profileAvatar");
+    const badgeContainer = document.getElementById("profileBadge");
+
+    if (nameEl) nameEl.innerText = displayName;
+    if (emailEl) emailEl.innerText = email;
+    if (branchEl) branchEl.innerText = branch;
+    if (batchEl) batchEl.innerText = batch;
+    if (roleEl) roleEl.innerText = role;
+    if (avatarEl) avatarEl.innerText = displayName.charAt(0).toUpperCase();
+
+    if (badgeContainer) {
+        if (isPlaced) {
+            badgeContainer.innerHTML = `<span class="px-3 py-1 text-xs rounded-full placed-badge font-bold inline-block">VERIFIED PLACED 🟢</span>`;
+        } else {
+            badgeContainer.innerHTML = `<span class="px-3 py-1 text-xs rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium inline-block">UNPLACED / SEARCHING</span>`;
+        }
+    }
+
+    const modal = document.getElementById("profileModal");
+    if (modal) {
+        modal.classList.remove("hidden");
+    }
+}
+
+function closeProfileModal() {
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.classList.add("hidden");
+}
+
+// Owner Modal Handlers
+function openOwnerModal() {
+    const modal = document.getElementById("ownerModal");
+    if (modal) modal.classList.remove("hidden");
+}
+
+function closeOwnerModal() {
+    const modal = document.getElementById("ownerModal");
+    if (modal) modal.classList.add("hidden");
+}
 
 function updateAuthUI() {
     const container = document.getElementById("authActions");
@@ -52,11 +106,11 @@ function updateAuthUI() {
 
     if (token && currentUser) {
         if (feedTabs) feedTabs.classList.remove("hidden");
-        const displayName = currentUser.name || currentUser.email.split("@")[0];
+        const displayName = currentUser.name || (currentUser.email ? currentUser.email.split("@")[0] : 'User');
 
         container.innerHTML = `
             <div class="flex items-center gap-3">
-                <button onclick="openProfileModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-cyber-border hover:border-cyan-500/50 transition-all">
+                <button type="button" onclick="openProfileModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-cyber-border hover:border-cyan-500/50 transition-all cursor-pointer">
                     <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">
                         ${displayName.charAt(0).toUpperCase()}
                     </span>
@@ -65,7 +119,7 @@ function updateAuthUI() {
                     </span>
                     ${currentUser.placed ? '<span class="text-[10px] px-1.5 py-0.5 rounded-full placed-badge font-bold">PLACED 🟢</span>' : ''}
                 </button>
-                <button onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all">
+                <button type="button" onclick="handleLogout()" class="text-xs bg-red-500/10 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all cursor-pointer">
                     Logout
                 </button>
             </div>
@@ -73,11 +127,41 @@ function updateAuthUI() {
     } else {
         if (feedTabs) feedTabs.classList.add("hidden");
         container.innerHTML = `
-            <button onclick="openAuthModal()" class="btn-primary">
+            <button type="button" onclick="openAuthModal()" class="btn-primary">
                 Login / Register
             </button>
         `;
     }
+}
+
+// Micro Skeleton Loading Effect
+function renderSkeletonLoader() {
+    const feed = document.getElementById("postsFeed");
+    if (!feed) return;
+
+    feed.innerHTML = [1, 2].map(() => `
+        <div class="glass-card p-6 rounded-2xl border border-cyber-border animate-pulse space-y-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-800"></div>
+                    <div class="space-y-2">
+                        <div class="h-4 w-32 bg-slate-800 rounded"></div>
+                        <div class="h-3 w-20 bg-slate-800/60 rounded"></div>
+                    </div>
+                </div>
+                <div class="h-6 w-24 bg-slate-800 rounded-full"></div>
+            </div>
+            <div class="h-5 w-3/4 bg-slate-800 rounded mb-2"></div>
+            <div class="space-y-2">
+                <div class="h-4 w-full bg-slate-800/60 rounded"></div>
+                <div class="h-4 w-5/6 bg-slate-800/60 rounded"></div>
+            </div>
+            <div class="pt-4 border-t border-cyber-border/40 flex gap-6">
+                <div class="h-6 w-20 bg-slate-800 rounded"></div>
+                <div class="h-6 w-24 bg-slate-800 rounded"></div>
+            </div>
+        </div>
+    `).join("");
 }
 
 function reloadCurrentFeed() {
@@ -91,6 +175,8 @@ async function filterFeed(mode) {
     const tabMy = document.getElementById("tabMy");
     const feedTitle = document.getElementById("feedTitle");
     const writingPadCard = document.getElementById("writingPadCard");
+
+    renderSkeletonLoader();
 
     if (mode === 'MY') {
         if (!token || !currentUser) return openAuthModal();
@@ -107,7 +193,7 @@ async function filterFeed(mode) {
                 const userEmail = currentUser.email;
                 rawPostsData = (result.data || []).filter(p => p.user && (p.user.email === userEmail || p.user.id === currentUser.id));
                 buildCompanyFilterBar(rawPostsData);
-                processAndRenderPosts(rawPostsData, true);
+                await processAndRenderPosts(rawPostsData, true);
             }
         } catch (err) {
             console.error("Error fetching user posts:", err);
@@ -122,25 +208,24 @@ async function filterFeed(mode) {
 }
 
 async function loadFeed() {
+    renderSkeletonLoader();
     try {
         const res = await fetch(`${API_BASE}/posts`);
         const result = await res.json();
         if (result.success) {
             rawPostsData = result.data || [];
             buildCompanyFilterBar(rawPostsData);
-            processAndRenderPosts(rawPostsData, false);
+            await processAndRenderPosts(rawPostsData, false);
         }
     } catch (err) {
         console.error("Failed to fetch feed:", err);
     }
 }
 
-// Generate Dynamic Company Filter Bar Buttons
 function buildCompanyFilterBar(posts) {
     const bar = document.getElementById("companyFilterBar");
     if (!bar) return;
 
-    // Extract Unique Companies
     const companies = ['ALL'];
     posts.forEach(p => {
         if (p.companyName) {
@@ -150,7 +235,7 @@ function buildCompanyFilterBar(posts) {
     });
 
     bar.innerHTML = companies.map(c => `
-        <button onclick="applyCompanyFilter('${c}')" className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${activeCompanyFilter === c ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20 font-bold' : 'bg-slate-900/80 text-slate-300 border border-cyber-border hover:border-cyan-500/40'}">
+        <button onclick="applyCompanyFilter('${c}')" class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${activeCompanyFilter === c ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20 font-bold' : 'bg-slate-900/80 text-slate-300 border border-cyber-border hover:border-cyan-500/40'}">
             ${c === 'ALL' ? '🏢 All Companies' : c}
         </button>
     `).join("");
@@ -179,13 +264,19 @@ async function processAndRenderPosts(posts, isMyPostsOnly) {
     const enrichedPosts = await Promise.all(posts.map(async (post) => {
         try {
             const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-            const res = await fetch(`${API_BASE}/posts/${post.id}/like-details`, { headers });
-            const data = await res.json();
-            const likesCount = data.success ? data.data.likesCount : 0;
-            const isLiked = data.success ? data.data.isLiked : false;
-            return { ...post, likesCount, isLiked };
+
+            const likeRes = await fetch(`${API_BASE}/posts/${post.id}/like-details`, { headers });
+            const likeData = await likeRes.json();
+            const likesCount = likeData.success ? likeData.data.likesCount : 0;
+            const isLiked = likeData.success ? likeData.data.isLiked : false;
+
+            const commRes = await fetch(`${API_BASE}/posts/${post.id}/comments`);
+            const commData = await commRes.json();
+            const commentsList = commData.success ? (commData.data || []) : [];
+
+            return { ...post, likesCount, isLiked, commentsList };
         } catch (e) {
-            return { ...post, likesCount: 0, isLiked: false };
+            return { ...post, likesCount: 0, isLiked: false, commentsList: [] };
         }
     }));
 
@@ -215,10 +306,18 @@ function renderPosts(posts, isMyPostsOnly) {
 
     posts.forEach(post => {
         if (!postInteractions[post.id]) {
-            postInteractions[post.id] = { allComments: [], isExpanded: false, likesCount: post.likesCount || 0, isLiked: post.isLiked || false };
+            postInteractions[post.id] = {
+                allComments: post.commentsList || [],
+                isExpanded: false,
+                likesCount: post.likesCount || 0,
+                isLiked: post.isLiked || false
+            };
+        } else {
+            postInteractions[post.id].allComments = post.commentsList || [];
         }
 
         const formattedDate = formatTimestamp(post.createdAt);
+        const commentCount = postInteractions[post.id].allComments.length;
 
         const postCard = document.createElement("div");
         postCard.className = "glass-card p-6 rounded-2xl border border-cyber-border hover:border-slate-700 transition-all duration-300 shadow-xl relative";
@@ -261,14 +360,16 @@ function renderPosts(posts, isMyPostsOnly) {
             <p class="text-slate-300 text-sm whitespace-pre-line leading-relaxed mb-4">${post.content}</p>
 
             <div class="flex items-center gap-6 pt-4 border-t border-cyber-border/60 text-slate-400 text-sm">
-                <button id="upvoteBtn-${post.id}" onclick="handleLike(${post.id})" class="flex items-center gap-2 transition-all font-medium">
+                <button id="upvoteBtn-${post.id}" onclick="handleLike(${post.id})" class="flex items-center gap-2 transition-all font-medium cursor-pointer">
                     <i id="upvoteIcon-${post.id}" class="fa-regular fa-thumbs-up"></i> 
                     <span id="upvoteText-${post.id}">Upvote</span> 
                     <span id="upvoteCount-${post.id}" class="ml-1 px-2 py-0.5 rounded-full text-xs bg-slate-800 border border-slate-700">${post.likesCount || 0}</span>
                 </button>
 
-                <button onclick="toggleComments(${post.id})" class="flex items-center gap-2 hover:text-cyan-400 transition-colors font-medium">
-                    <i class="fa-regular fa-comment"></i> Comments
+                <button onclick="toggleComments(${post.id})" class="flex items-center gap-2 hover:text-cyan-400 transition-colors font-medium cursor-pointer">
+                    <i class="fa-regular fa-comment"></i> 
+                    <span>Comments</span>
+                    <span id="commentBadge-${post.id}" class="px-2 py-0.5 rounded-full text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">${commentCount}</span>
                 </button>
             </div>
 
@@ -372,11 +473,11 @@ function updateLikeUI(postId, count, isLiked) {
     if (countSpan) countSpan.innerText = count;
 
     if (isLiked) {
-        btn.className = "flex items-center gap-2 text-cyan-400 font-bold transition-all";
+        btn.className = "flex items-center gap-2 text-cyan-400 font-bold transition-all cursor-pointer";
         if (icon) icon.className = "fa-solid fa-thumbs-up text-cyan-400";
         if (text) text.innerText = "Upvoted";
     } else {
-        btn.className = "flex items-center gap-2 text-slate-400 hover:text-cyan-400 font-medium transition-all";
+        btn.className = "flex items-center gap-2 text-slate-400 hover:text-cyan-400 font-medium transition-all cursor-pointer";
         if (icon) icon.className = "fa-regular fa-thumbs-up";
         if (text) text.innerText = "Upvote";
     }
@@ -419,6 +520,10 @@ async function loadAndRenderComments(postId) {
 
         if (data.success) {
             postInteractions[postId].allComments = data.data || [];
+
+            const badge = document.getElementById(`commentBadge-${postId}`);
+            if (badge) badge.innerText = postInteractions[postId].allComments.length;
+
             renderCommentsUI(postId);
         }
     } catch (err) {
@@ -433,7 +538,7 @@ function renderCommentsUI(postId) {
     const { allComments, isExpanded } = postInteractions[postId];
 
     if (allComments.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic py-1">Be the first to comment!</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 italic py-1">No comments yet. Be the first to reply!</p>`;
         return;
     }
 
@@ -446,7 +551,7 @@ function renderCommentsUI(postId) {
                 <span class="text-slate-300 ml-1">${c.content}</span>
             </div>
             ${(currentUser && c.user && c.user.email === currentUser.email) ?
-        `<button onclick="handleDeleteComment(${c.id}, ${postId})" class="text-red-400 hover:text-red-300 text-[10px] ml-2"><i class="fa-solid fa-trash"></i></button>` : ''}
+        `<button onclick="handleDeleteComment(${c.id}, ${postId})" class="text-red-400 hover:text-red-300 text-[10px] ml-2 cursor-pointer"><i class="fa-solid fa-trash"></i></button>` : ''}
         </div>
     `).join("");
 
@@ -454,7 +559,7 @@ function renderCommentsUI(postId) {
         const remaining = allComments.length - 2;
         html += `
             <div class="pt-1 text-center">
-                <button onclick="toggleExpandComments(${postId})" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+                <button onclick="toggleExpandComments(${postId})" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold transition-colors cursor-pointer">
                     ${isExpanded ? 'Show Less' : `<i class="fa-solid fa-chevron-down mr-1"></i> VIEW MORE COMMENTS (${remaining} more)`}
                 </button>
             </div>
@@ -512,28 +617,6 @@ async function handleAddComment(postId) {
     }
 }
 
-function openProfileModal() {
-    if (!currentUser) return;
-
-    const displayName = currentUser.name || currentUser.email.split("@")[0];
-    document.getElementById("profileName").innerText = displayName;
-    document.getElementById("profileEmail").innerText = currentUser.email || "";
-    document.getElementById("profileBranch").innerText = currentUser.branch || "CSE";
-    document.getElementById("profileBatch").innerText = currentUser.batch || "2026";
-    document.getElementById("profileRole").innerText = currentUser.role || "STUDENT";
-    document.getElementById("profileAvatar").innerText = displayName.charAt(0).toUpperCase();
-
-    const badgeContainer = document.getElementById("profileBadge");
-    if (currentUser.placed) {
-        badgeContainer.innerHTML = `<span class="px-3 py-1 text-xs rounded-full placed-badge font-bold inline-block">VERIFIED PLACED 🟢</span>`;
-    } else {
-        badgeContainer.innerHTML = `<span class="px-3 py-1 text-xs rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium inline-block">UNPLACED / SEARCHING</span>`;
-    }
-
-    document.getElementById("profileModal").classList.remove("hidden");
-}
-
-function closeProfileModal() { document.getElementById("profileModal").classList.add("hidden"); }
 function openAuthModal() { document.getElementById("authModal").classList.remove("hidden"); }
 function closeAuthModal() { document.getElementById("authModal").classList.add("hidden"); }
 
@@ -622,7 +705,6 @@ function handleLogout() {
     filterFeed('ALL');
 }
 
-// Create Post Handler
 async function handleCreatePost() {
     if (!token) return openAuthModal();
 
@@ -650,7 +732,6 @@ async function handleCreatePost() {
             document.getElementById("postTitle").value = "";
             document.getElementById("postContent").value = "";
 
-            // Trigger Green Success Popup
             showSuccessModal("Post Successful! Your interview experience is now live on the feed.");
             reloadCurrentFeed();
         } else {
