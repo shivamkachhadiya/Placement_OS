@@ -499,6 +499,14 @@ function updateLikeUI(postId, count, isLiked) {
 async function handleLike(postId) {
     if (!token) return openAuthModal();
 
+    // 1. Optimistic Update (Instant feedback on click)
+    const currentData = postInteractions[postId] || { likesCount: 0, isLiked: false };
+    const newIsLiked = !currentData.isLiked;
+    const newCount = newIsLiked ? currentData.likesCount + 1 : Math.max(0, currentData.likesCount - 1);
+
+    // Immediate UI update without waiting for network response
+    updateLikeUI(postId, newCount, newIsLiked);
+
     try {
         const res = await fetch(`${API_BASE}/posts/${postId}/like`, {
             method: "POST",
@@ -507,11 +515,16 @@ async function handleLike(postId) {
         const result = await res.json();
 
         if (result.success) {
+            // Sync with exact backend state without reloading feed
             updateLikeUI(postId, result.data.likesCount, result.data.isLiked);
-            reloadCurrentFeed();
+        } else {
+            // Revert back if backend fails
+            updateLikeUI(postId, currentData.likesCount, currentData.isLiked);
         }
     } catch (err) {
         console.error("Error toggling like:", err);
+        // Revert back on error
+        updateLikeUI(postId, currentData.likesCount, currentData.isLiked);
     }
 }
 
