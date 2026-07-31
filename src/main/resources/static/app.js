@@ -665,34 +665,66 @@ async function handleAuthSubmit(e) {
 }
 
 async function performLogin(email, password) {
+    const submitBtn = document.getElementById("authSubmitBtn");
+    const originalText = submitBtn ? submitBtn.innerText : "Login";
+
+    // 1. Loading UI state
+    if (submitBtn) {
+        submitBtn.innerText = "Authenticating...";
+        submitBtn.disabled = true;
+    }
+
     try {
         const res = await fetch(`${API_BASE}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
 
-        if (data.success) {
-            const responseData = data.data;
-            token = typeof responseData === 'string' ? responseData : (responseData.token || responseData.jwt);
-
-            currentUser = responseData.user || {
-                email: email,
-                name: email.split("@")[0]
-            };
-
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(currentUser));
-
-            closeAuthModal();
-            updateAuthUI();
-            reloadCurrentFeed();
-        } else {
-            showCustomAlert(data.message || "Login failed!");
+        // Response Parse safely
+        let data = {};
+        try {
+            data = await res.json();
+        } catch (e) {
+            data = {};
         }
+
+        // 2. Pure Frontend Check: Status 200/201 na ho ya data.success false ho
+        if (!res.ok || data.success === false) {
+            // Frontend error message construct karna (bina backend pe depend hue)
+            const errorMsg = data.message || (res.status === 401 || res.status === 403
+                ? "Invalid Email or Password! If you don't have an account, please Register."
+                : "User does not exist or login failed!");
+
+            showCustomAlert(errorMsg);
+            return;
+        }
+
+        // 3. Success Path
+        const responseData = data.data || data;
+        token = typeof responseData === 'string' ? responseData : (responseData.token || responseData.jwt);
+
+        currentUser = responseData.user || {
+            email: email,
+            name: email.split("@")[0]
+        };
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(currentUser));
+
+        closeAuthModal();
+        updateAuthUI();
+        reloadCurrentFeed();
+
     } catch (err) {
-        showCustomAlert("Error connecting to server!");
+        // Network or fetch fail case
+        showCustomAlert("Unable to connect to server. Please try again later!");
+    } finally {
+        // 4. Reset Button State (Program kabhi stuck nahi hoga!)
+        if (submitBtn) {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+        }
     }
 }
 
