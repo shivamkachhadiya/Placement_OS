@@ -806,10 +806,65 @@ let isRegisterMode = false;
 let currentFeedMode = 'ALL';
 let activeCompanyFilter = 'ALL';
 let rawPostsData = [];
-
+let coldStartTimerInterval = null;
+let coldSeconds = 0;
 // Local state store for posts
 const postInteractions = {};
+let coldStartTimerInterval = null;
+let coldSeconds = 0;
 
+const funnyQuotes = [
+    "Render's free server is waking up... Grab a quick coffee! ☕",
+    "Feeding the hamsters powering our backend... 🐹",
+    "Bribing the server with virtual samosas... 🥟",
+    "First request takes ~70s. Perfect time to practice 1 DSA logic! 🧠",
+    "Waking up the database from its deep slumber... 💤",
+    "Almost there! Once awake, everything runs at lightning speed ⚡"
+];
+
+function showColdStartOverlay() {
+    const overlay = document.getElementById("coldStartOverlay");
+    const quoteEl = document.getElementById("funnyQuote");
+    const timerEl = document.getElementById("coldTimer");
+    const progressEl = document.getElementById("coldProgressBar");
+
+    if (!overlay) return;
+
+    // Reset values
+    coldSeconds = 0;
+    if (quoteEl) quoteEl.innerText = funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
+    if (timerEl) timerEl.innerText = `0s / ~70s`;
+    if (progressEl) progressEl.style.width = `0%`;
+
+    overlay.classList.remove("hidden");
+
+    clearInterval(coldStartTimerInterval);
+    coldStartTimerInterval = setInterval(() => {
+        coldSeconds++;
+        if (timerEl) timerEl.innerText = `${coldSeconds}s / ~70s`;
+
+        // Progress bar estimation (up to 95% till request completes)
+        const percent = Math.min(Math.floor((coldSeconds / 70) * 100), 95);
+        if (progressEl) progressEl.style.width = `${percent}%`;
+
+        // Rotate quotes every 15 seconds
+        if (coldSeconds % 15 === 0 && quoteEl) {
+            quoteEl.innerText = funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
+        }
+    }, 1000);
+}
+
+function hideColdStartOverlay() {
+    const overlay = document.getElementById("coldStartOverlay");
+    const progressEl = document.getElementById("coldProgressBar");
+
+    if (progressEl) progressEl.style.width = `100%`;
+
+    setTimeout(() => {
+        if (overlay) overlay.classList.add("hidden");
+        clearInterval(coldStartTimerInterval);
+    }, 400); // Small smooth transition delay
+}
 document.addEventListener("DOMContentLoaded", () => {
     updateAuthUI();
     loadFeed();
@@ -1023,15 +1078,27 @@ async function filterFeed(mode) {
 
 async function loadFeed() {
     renderSkeletonLoader();
+
+    // Timer check: Agar request 2.5s se zyada le rahi hai -> Cold Start Overlay Dikhao
+    const coldStartTimeout = setTimeout(() => {
+        showColdStartOverlay();
+    }, 2500);
+
     try {
         const res = await fetch(`${API_BASE}/posts`);
         const result = await res.json();
+
+        clearTimeout(coldStartTimeout);
+        hideColdStartOverlay();
+
         if (result.success) {
             rawPostsData = result.data || [];
             buildCompanyFilterBar(rawPostsData);
             await processAndRenderPosts(rawPostsData, false);
         }
     } catch (err) {
+        clearTimeout(coldStartTimeout);
+        hideColdStartOverlay();
         console.error("Failed to fetch feed:", err);
     }
 }
