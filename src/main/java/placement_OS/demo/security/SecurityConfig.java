@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -46,17 +47,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 1. CORS Configuration (CorsConfig bean ko auto-detect karega)
+                .cors(Customizer.withDefaults())
+
+                // 2. CSRF Disable (JWT Stateless App ke liye)
                 .csrf(csrf -> csrf.disable())
+
+                // 3. Stateless Session Management
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. Request Authorization Rules
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Static HTML, CSS, JS files everywhere permit
+                        // Static HTML, CSS, JS files everywhere permit
                         .requestMatchers("/", "/index.html", "/style.css", "/app.js", "/static/**", "/error").permitAll()
-                        // 2. Auth & User registration permit
+                        // Auth & User registration permit
                         .requestMatchers("/auth/**", "/users/**").permitAll()
-                        // 3. GET feed, user posts, and comments publicly readable
+                        // GET feed, user posts, and comments publicly readable
                         .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
-                        // 4. Creation, Deletion, Likes & Placement Verification requires Auth Token
+                        // Creation, Deletion, Likes & Placement Verification requires Auth Token
                         .requestMatchers(HttpMethod.POST, "/posts/**", "/placement/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/posts/**").authenticated()
                         .anyRequest().authenticated()
