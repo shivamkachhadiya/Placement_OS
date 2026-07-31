@@ -681,7 +681,6 @@ async function performLogin(email, password) {
             body: JSON.stringify({ email, password })
         });
 
-        // Response Parse safely
         let data = {};
         try {
             data = await res.json();
@@ -689,13 +688,14 @@ async function performLogin(email, password) {
             data = {};
         }
 
-        // 2. Pure Frontend Check: Status 200/201 na ho ya data.success false ho
+        // 2. Authentication Failed Case
         if (!res.ok || data.success === false) {
-            // Frontend error message construct karna (bina backend pe depend hue)
             const errorMsg = data.message || (res.status === 401 || res.status === 403
                 ? "Invalid Email or Password! If you don't have an account, please Register."
                 : "User does not exist or login failed!");
 
+            // 🔥 MAIN FIX: Error popup dikhane se PEHLE Login Modal band karo!
+            closeAuthModal();
             showCustomAlert(errorMsg);
             return;
         }
@@ -717,10 +717,11 @@ async function performLogin(email, password) {
         reloadCurrentFeed();
 
     } catch (err) {
-        // Network or fetch fail case
+        // 🔥 MAIN FIX: Network error me bhi Login Modal band karo taaki Alert seedha dikhe
+        closeAuthModal();
         showCustomAlert("Unable to connect to server. Please try again later!");
     } finally {
-        // 4. Reset Button State (Program kabhi stuck nahi hoga!)
+        // Reset Button State
         if (submitBtn) {
             submitBtn.innerText = originalText;
             submitBtn.disabled = false;
