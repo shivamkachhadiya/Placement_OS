@@ -10,7 +10,7 @@ import placement_OS.demo.service.InteractionService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/posts")
 public class InteractionController {

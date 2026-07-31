@@ -9,7 +9,7 @@ import placement_OS.demo.entity.User;
 import placement_OS.demo.service.UserService;
 
 import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/users")
 public class UserController {

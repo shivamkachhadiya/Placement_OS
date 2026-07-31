@@ -8,7 +8,7 @@ import placement_OS.demo.response.ApiResponse;
 import placement_OS.demo.service.PlacementService;
 
 import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/placement")
 public class PlacementController {

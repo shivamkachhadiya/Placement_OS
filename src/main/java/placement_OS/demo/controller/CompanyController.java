@@ -10,7 +10,7 @@ import placement_OS.demo.response.ApiResponse;
 import placement_OS.demo.service.CompanyService;
 
 import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/companies")
 public class CompanyController {

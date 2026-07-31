@@ -13,7 +13,7 @@ import placement_OS.demo.service.AuthService;
 import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {

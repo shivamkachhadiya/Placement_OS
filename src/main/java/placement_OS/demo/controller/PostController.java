@@ -9,7 +9,7 @@ import placement_OS.demo.service.PostService;
 
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/posts")
 public class PostController {
