@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080";
+const API_BASE = "https://placement-os-rsd1.onrender.com";
 let token = localStorage.getItem("token");
 let currentUser = JSON.parse(localStorage.getItem("user") || "null");
 let isRegisterMode = false;
